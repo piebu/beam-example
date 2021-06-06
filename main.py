@@ -45,7 +45,7 @@ parser.add_argument('--input_file', help='Csv transaction file url')
 args = parser.parse_args()
 app_param = check_args(args)
 
-outputs_prefix = 'outputs/result'
+outputs_prefix = 'output/result'
 
 
 # Running locally in the DirectRunner.
