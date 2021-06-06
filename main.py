@@ -6,10 +6,6 @@ import argparse
 
 from apache_beam.io.filesystem import CompressionTypes
 
-input_file = 'data/transactions.csv'
-# input_file = 'gs://cloud-samples-data/bigquery/sample-transactions/transactions.csv'
-outputs_prefix = 'outputs/result'
-
 
 def convert_string_to_time(time_string):
     return time.strptime(time_string, '%Y-%m-%d %H:%M:%S %Z')
@@ -48,6 +44,8 @@ parser.add_argument('--min_amount', default=10, help='Minimum transaction amount
 parser.add_argument('--input_file', help='Csv transaction file url')
 args = parser.parse_args()
 app_param = check_args(args)
+
+outputs_prefix = 'outputs/result'
 
 
 # Running locally in the DirectRunner.
