@@ -45,8 +45,6 @@ parser.add_argument('--input_file', help='Csv transaction file url')
 args = parser.parse_args()
 app_param = check_args(args)
 
-outputs_prefix = 'output/result'
-
 
 # Running locally in the DirectRunner.
 with beam.Pipeline() as pipeline:
@@ -58,5 +56,5 @@ with beam.Pipeline() as pipeline:
         | 'Create the pair' >> beam.Map(lambda transaction: (time.strftime("%Y-%m-%d", transaction[0]), transaction[1]))
         | 'Group and sum' >> beam.CombinePerKey(sum)
         | 'Create json' >> beam.Map(lambda sum_per_day: json.dumps({'date': sum_per_day[0], 'total_amount': sum_per_day[1]}))
-        | 'Write results' >> beam.io.WriteToText('outputs/result', file_name_suffix='.jsonl.gz', compression_type=CompressionTypes.GZIP)
+        | 'Write results' >> beam.io.WriteToText('output/result', file_name_suffix='.jsonl.gz', compression_type=CompressionTypes.GZIP)
     )
