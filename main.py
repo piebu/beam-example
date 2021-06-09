@@ -23,7 +23,7 @@ def filter_transaction(transaction, app_params):
 
 
 def check_args(app_args):
-    if app_args.year is None or (2000 <= int(app_args.year) >= date.today().year):
+    if app_args.year is None or (2000 < int(app_args.year) > date.today().year):
         print("Parameter year accepted between 2000 and", date.today().year)
         exit(-1)
     if app_args.min_amount is None or float(app_args.min_amount) < 0:
