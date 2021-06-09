@@ -52,15 +52,23 @@ beam_options = PipelineOptions(
     runner='DirectRunner'
 )
 
+@beam.ptransform_fn
+def AggregatePerDay(pcoll):
+    return (
+        pcoll
+        | 'Split lines' >> beam.Map(lambda line: split_and_enrich_with_time(line))
+        | 'Filter lines' >> beam.Filter(lambda line: filter_transaction(line, app_param))
+        | 'Create the pair' >> beam.Map(lambda transaction: (time.strftime("%Y-%m-%d", transaction[0]), transaction[1]))
+        | 'Group and sum' >> beam.CombinePerKey(sum)
+        | 'Create json' >> beam.Map(
+            lambda sum_per_day: json.dumps({'date': sum_per_day[0], 'total_amount': sum_per_day[1]}))
+    )
+
 # Running locally in the DirectRunner.
 with beam.Pipeline(None, beam_options) as pipeline:
     (
         pipeline
         | 'Read lines' >> beam.io.ReadFromText(args.input_file, skip_header_lines=1)
-        | 'Split lines' >> beam.Map(lambda line: split_and_enrich_with_time(line))
-        | 'Filter lines' >> beam.Filter(lambda line: filter_transaction(line, app_param))
-        | 'Create the pair' >> beam.Map(lambda transaction: (time.strftime("%Y-%m-%d", transaction[0]), transaction[1]))
-        | 'Group and sum' >> beam.CombinePerKey(sum)
-        | 'Create json' >> beam.Map(lambda sum_per_day: json.dumps({'date': sum_per_day[0], 'total_amount': sum_per_day[1]}))
+        | 'Aggregate Per Day' >> AggregatePerDay()
         | 'Write results' >> beam.io.WriteToText('output/result', file_name_suffix='.jsonl.gz', compression_type=CompressionTypes.GZIP)
     )
